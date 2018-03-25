@@ -3,8 +3,6 @@
 #include<QtBluetooth>
 
 
-//RX -> tx
-//tx -> Rx
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -12,35 +10,28 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     connect(agent, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
             this, SLOT(deviceDiscovered(QBluetoothDeviceInfo)));
-   // agent->start();
-
-
    socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
-
-
-
-
-
+  /* connect(socket, SIGNAL(messageReceived(QString,QString)),
+           this, SLOT(showMessage(QString,QString)));*/
+   connect(socket,SIGNAL(readyRead()),this,SLOT(escribir_Temp()));
+   connect(socket,SIGNAL(connected()),this,SLOT(mostrar_conectado()));
 
 }
 
+void MainWindow::mostrar_conectado(){
+     ui->status->setText("Status: Conectado");
+}
 
 MainWindow::~MainWindow()
 {
     delete ui;
-
-
-
-
 }
 
 
 void MainWindow::on_find_clicked()
-{ ui->comboBox->clear();
-    //agent->stop();
-   agent->start();
-
-
+{
+    ui->comboBox->clear();
+    agent->start();
 }
 
 
@@ -58,34 +49,12 @@ void MainWindow::on_off_clicked()
 
 void MainWindow::deviceDiscovered(const QBluetoothDeviceInfo &device)
 {
-
     ui->comboBox->addItem(device.address().toString());
-}
-
-
-
-
-void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
-{
- string =item->text();
-
-
- //static const QString serviceUuid(QStringLiteral("00001101-0000-1000-8000-00805F9B34FB"));
-
-
-
-
-
 }
 
 void MainWindow::on_BConectar_clicked()
 {
      socket->connectToService(QBluetoothAddress(string),1);
-     if(socket->isOpen()){
-         ui->status->setText("Status: Conectado");
-     }else{
-         ui->status->setText("Status: No Conectado");
-     }
 }
 
 void MainWindow::on_comboBox_currentIndexChanged(const QString &arg1)
@@ -96,14 +65,44 @@ void MainWindow::on_comboBox_currentIndexChanged(const QString &arg1)
 void MainWindow::on_Salir_clicked()
 {
     socket->write("Cerrar_Programa");
+    socket->close();
+    this->close();
+}
+
+void MainWindow::escribir_Temp(){
+    QString lines = socket->read(1024);
+   ui->label_2->setText(lines);
 }
 
 void MainWindow::on_LeerTemp_clicked()
 {
      socket->write("Leer_Temp");
+
 }
 
 void MainWindow::on_LeerLuz_clicked()
 {
-     socket->write("Leer_Luz");
+     socket->write("Leer_luz");
+}
+
+void MainWindow::on_automatizacion_clicked(bool checked)
+{
+    if(checked){
+        socket->write("Automatizacion");
+    }
+    else{
+        socket->write("No_Automatizacion");
+
+    }
+}
+
+void MainWindow::on_config_auto_clicked()
+{
+    socket->write("Config_Auto");
+    std::string str1 = ui->spinLuz->text().toStdString();
+    const char* p1 = str1.c_str();
+    std::string str2 = ui->spinTemp->text().toStdString();
+    const char* p2 = str2.c_str();
+    socket->write(p1);
+    socket->write(p2);
 }
