@@ -7,7 +7,8 @@
 #include<QBluetoothSocket>
 #include<QListWidget>
 
-
+#define On 1
+#define Off 0
 
 
 namespace Ui {
@@ -23,15 +24,16 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    QByteArray temperatura;
+
+
 
 
 private slots:
     void on_find_clicked();
 
-    void on_on_clicked();
+    void on_R1_on_clicked();
 
-    void on_off_clicked();
+    void on_R1_off_clicked();
 
     void deviceDiscovered(const QBluetoothDeviceInfo &device);
 
@@ -49,17 +51,37 @@ private slots:
 
     void mostrar_conectado();
 
+    void mostrar_desconectado();
 
-    void on_automatizacion_clicked(bool checked);
+    void on_automatizacion_clicked(bool Activo);
 
     void on_config_auto_clicked();
 
+    void Config_Rele(int Rele,int Modo);
+
+    void on_R2_on_clicked();
+
+    void on_R2_off_clicked();
+
 private:
+
     Ui::MainWindow *ui;
     QBluetoothDeviceDiscoveryAgent *agent = new QBluetoothDeviceDiscoveryAgent;
     QBluetoothSocket *socket;
     QString string;
-   bool k = false;
+    bool k = false;
+
+   typedef struct{
+   char Comando[10];
+   int Modo;
+   }Param_Comando_Rele;
+
+   typedef struct{
+   char Comando[10];
+   int luz;
+   int temperatura;
+   }Param_Comando_CA;
+
 };
 
 
