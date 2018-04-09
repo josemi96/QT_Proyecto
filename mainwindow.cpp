@@ -8,12 +8,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->tabWidget->setTabEnabled(1,false);
+    ui->tabWidget->setTabEnabled(2,false);
+    ui->tabWidget->setTabEnabled(3,false);
+    setWindowTitle(tr("Proyecto"));
     connect(agent, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
             this, SLOT(deviceDiscovered(QBluetoothDeviceInfo)));
    socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
   /* connect(socket, SIGNAL(messageReceived(QString,QString)),
            this, SLOT(showMessage(QString,QString)));*/
-   connect(socket,SIGNAL(readyRead()),this,SLOT(escribir_Temp()));
+   connect(socket,SIGNAL(readyRead()),this,SLOT(recibir_respuesta()));
    connect(socket,SIGNAL(connected()),this,SLOT(mostrar_conectado()));
    connect(socket,SIGNAL(disconnected()),this,SLOT(mostrar_desconectado()));
 
@@ -25,12 +29,38 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::recibir_respuesta(){
+    QByteArray respuesta= socket->readAll();
+    QString Comando = respuesta.left(10);
+
+   if (Comando == "Comando_LT"){
+        Param_Comando_Simple* param= reinterpret_cast<Param_Comando_Simple*>(respuesta.data());
+        QString numero;
+        numero.setNum((float)param->dato);
+        ui->lcdtemp->display(numero); }
+
+   if (Comando == "Comando_LL"){
+       Param_Comando_Simple* param= reinterpret_cast<Param_Comando_Simple*>(respuesta.data());
+       QString numero;
+       numero.setNum(param->dato);
+       ui->lcdluz->display(numero); }
+
+
+}
+
 void MainWindow::mostrar_conectado(){
      ui->status->setText("Estado: Conectado");
+     ui->tabWidget->setTabEnabled(1,true);
+     ui->tabWidget->setTabEnabled(2,true);
+     ui->tabWidget->setTabEnabled(3,true);
 }
 
 void MainWindow::mostrar_desconectado(){
      ui->status->setText("Estado: Desconectado");
+     ui->tabWidget->setCurrentIndex(0);
+     ui->tabWidget->setTabEnabled(1,false);
+     ui->tabWidget->setTabEnabled(2,false);
+     ui->tabWidget->setTabEnabled(3,false);
 }
 
 
@@ -103,21 +133,15 @@ void MainWindow::Config_Rele(int Rele,int Modo){
 }
 
 
-void MainWindow::escribir_Temp(){
-    QString lines = socket->read(1024);
-   ui->label_2->setText(lines);
-}
-
 void MainWindow::on_LeerTemp_clicked()
 {
-     socket->write("Leer_Temp");
-
+     socket->write("Comando_LT");
 }
 
 
 
 void MainWindow::on_LeerLuz_clicked()
-{
+{   /*
     typedef struct
     {
     QString Comando;
@@ -129,9 +153,8 @@ void MainWindow::on_LeerLuz_clicked()
     receipt->result_code = 15;
     char *p = (char*)receipt; // cast it to char* to make a QByteArray
     QByteArray packet(p, sizeof(estructura));
-
-
-    socket->write(packet);
+*/
+    socket->write("Comando_LL");
 }
 
 void MainWindow::on_automatizacion_clicked(bool Activo)

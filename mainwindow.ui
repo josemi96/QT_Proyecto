@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="manual">
      <attribute name="title">
@@ -152,8 +152,8 @@
      <widget class="QLabel" name="label_2">
       <property name="geometry">
        <rect>
-        <x>210</x>
-        <y>220</y>
+        <x>120</x>
+        <y>340</y>
         <width>171</width>
         <height>16</height>
        </rect>
@@ -188,17 +188,17 @@
        <string>off</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="lcdNumber">
+     <widget class="QLCDNumber" name="lcdtemp">
       <property name="geometry">
        <rect>
-        <x>270</x>
-        <y>280</y>
-        <width>91</width>
+        <x>210</x>
+        <y>210</y>
+        <width>111</width>
         <height>31</height>
        </rect>
       </property>
       <property name="smallDecimalPoint">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QPushButton" name="LeerLuz">
@@ -238,6 +238,16 @@
       </property>
       <property name="text">
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Relé 2&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="lcdluz">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>270</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
       </property>
      </widget>
     </widget>

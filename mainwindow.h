@@ -47,7 +47,7 @@ private slots:
 
     void on_LeerLuz_clicked();
 
-    void escribir_Temp();
+    void recibir_respuesta();
 
     void mostrar_conectado();
 
@@ -81,6 +81,11 @@ private:
    int luz;
    int temperatura;
    }Param_Comando_CA;
+
+   typedef struct{
+        char Comando[10];
+        float dato;
+    }Param_Comando_Simple;
 
 };
 
