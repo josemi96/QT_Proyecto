@@ -63,6 +63,14 @@ private slots:
 
     void on_R2_off_clicked();
 
+    void on_config_prog_clicked();
+
+    void on_programacion_clicked(bool Activo);
+
+    void on_luz_max_clicked();
+
+    void on_luz_min_clicked();
+
 private:
 
     Ui::MainWindow *ui;
@@ -70,6 +78,8 @@ private:
     QBluetoothSocket *socket;
     QString string;
     bool k = false;
+    int Luz_Min = 0;
+    int Luz_Max = 100000;
 
    typedef struct{
    char Comando[10];
@@ -86,6 +96,12 @@ private:
         char Comando[10];
         float dato;
     }Param_Comando_Simple;
+
+    typedef struct{
+        char Comando[10];
+        int Modo1, Hora1, Minuto1;
+        int Modo2, Hora2, Minuto2;
+    }Param_Comando_CP;
 
 };
 

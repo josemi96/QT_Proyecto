@@ -15,8 +15,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(agent, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
             this, SLOT(deviceDiscovered(QBluetoothDeviceInfo)));
    socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
-  /* connect(socket, SIGNAL(messageReceived(QString,QString)),
-           this, SLOT(showMessage(QString,QString)));*/
    connect(socket,SIGNAL(readyRead()),this,SLOT(recibir_respuesta()));
    connect(socket,SIGNAL(connected()),this,SLOT(mostrar_conectado()));
    connect(socket,SIGNAL(disconnected()),this,SLOT(mostrar_desconectado()));
@@ -42,9 +40,27 @@ void MainWindow::recibir_respuesta(){
    if (Comando == "Comando_LL"){
        Param_Comando_Simple* param= reinterpret_cast<Param_Comando_Simple*>(respuesta.data());
        QString numero;
+       float porcent;
        numero.setNum(param->dato);
-       ui->lcdluz->display(numero); }
+       ui->lcdluz->display(numero);
+       porcent = 100*((param->dato-Luz_Min)/(Luz_Max-Luz_Min));
+       ui->luz_porcent->setText(numero.setNum(porcent));}
 
+   if (Comando == "Comando_AP"){
+       ui->mensaje_prog->setText("Parametros no configurados.");
+       ui->programacion->setChecked(false); }
+
+   if (Comando == "Comando_AA"){
+       ui->mensaje_auto->setText("Parametros no configurados.");
+       ui->automatizacion->setChecked(false); }
+
+   if (Comando == "Comando_L1"){
+       Param_Comando_Simple* param= reinterpret_cast<Param_Comando_Simple*>(respuesta.data());
+       Luz_Min= (int)param->dato; }
+
+   if (Comando == "Comando_L2"){
+       Param_Comando_Simple* param= reinterpret_cast<Param_Comando_Simple*>(respuesta.data());
+       Luz_Max= (int)param->dato; }
 
 }
 
@@ -87,7 +103,7 @@ void MainWindow::on_BConectar_clicked()
 
 void MainWindow::on_Salir_clicked()
 {
-    socket->write("Comando_CP");
+    socket->write("Comando_CG");
     socket->close();
     this->close();
 }
@@ -141,19 +157,7 @@ void MainWindow::on_LeerTemp_clicked()
 
 
 void MainWindow::on_LeerLuz_clicked()
-{   /*
-    typedef struct
-    {
-    QString Comando;
-    int result_code; // true if sucessful, false otherwise
-    } estructura;
-
-    estructura *receipt = new estructura;
-    receipt->Comando="C";
-    receipt->result_code = 15;
-    char *p = (char*)receipt; // cast it to char* to make a QByteArray
-    QByteArray packet(p, sizeof(estructura));
-*/
+{
     socket->write("Comando_LL");
 }
 
@@ -164,7 +168,6 @@ void MainWindow::on_automatizacion_clicked(bool Activo)
     }
     else{
         socket->write("Comando_NA");
-
     }
 }
 
@@ -177,6 +180,52 @@ void MainWindow::on_config_auto_clicked()
     char *p = (char*)param;
     QByteArray packet(p, sizeof(Param_Comando_CA));
     socket->write(packet);
+    ui->mensaje_auto->setText("");
 }
 
 
+
+void MainWindow::on_config_prog_clicked()
+{
+    Param_Comando_CP *param = new Param_Comando_CP;
+    strcpy(param->Comando,"Comando_CP");
+    if(ui->on_off_R1->currentText()=="Encender"){
+        param->Modo1=1;
+    }else{
+        param->Modo1=0;
+    }
+    if(ui->on_off_R2->currentText()=="Encender"){
+        param->Modo2=1;
+    }else{
+        param->Modo2=0;
+    }
+    param->Hora1=ui->time1->time().hour();
+    param->Minuto1=ui->time1->time().minute();
+    param->Hora2=ui->time2->time().hour();
+    param->Minuto2=ui->time2->time().minute();
+    char *p = (char*)param;
+    QByteArray packet(p, sizeof(Param_Comando_CP));
+    socket->write(packet);
+    ui->mensaje_prog->setText("");
+}
+
+void MainWindow::on_programacion_clicked(bool Activo)
+{
+    if(Activo){
+        socket->write("Comando_AP");
+    }
+    else{
+        socket->write("Comando_NP");
+    }
+}
+
+void MainWindow::on_luz_max_clicked()
+{
+    socket->write("Comando_L2");
+}
+
+void MainWindow::on_luz_min_clicked()
+{
+    socket->write("Comando_L1");
+
+}
